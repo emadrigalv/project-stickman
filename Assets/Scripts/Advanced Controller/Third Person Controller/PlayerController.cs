@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] private Animator animator;
     [SerializeField] private CharacterController characterController;
+    [SerializeField] private EnviromentScanner enviromentScanner;
 
     [Header("Player Settings")]
     [SerializeField] private float moveSpeed = 5.0f;
@@ -23,6 +24,7 @@ public class PlayerController : MonoBehaviour
     CameraController camController;
     Quaternion targetRotation;
 
+    public bool IsOnLedge {  get; private set; }
     public float RotationSpeed => rotationSpeed;
 
     private void Awake()
@@ -52,6 +54,8 @@ public class PlayerController : MonoBehaviour
         if (isGrounded)
         {
             ySpeed = -1.0f;
+
+            IsOnLedge = enviromentScanner.LedgeCheck(moveDirection);
         }
         else
         {

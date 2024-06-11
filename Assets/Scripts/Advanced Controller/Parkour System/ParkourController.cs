@@ -14,6 +14,7 @@ public class ParkourController : MonoBehaviour
 
 
     bool inAction;
+    public bool isMatching = false;
     RaycastHit hit;
     ParkourAction theAction;
 
@@ -57,7 +58,7 @@ public class ParkourController : MonoBehaviour
 
         // Verify if the animation state is the same as the animation that should be performed
         if (!animState.IsName(action.AnimName))
-            Debug.LogError("Parkour animation is wrong!");
+            Debug.LogError($"Parkour animation is wrong! {action.AnimName}");
 
         float timer = 0.0f;
 
@@ -72,13 +73,19 @@ public class ParkourController : MonoBehaviour
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, action.TargetAnimRotation, playerController.RotationSpeed * Time.deltaTime);
 
             if (action.EnableTargetMatching)
+            {
+                animator.applyRootMotion = true;
                 MatchTarget(action);
+            }
+            
 
             if (animator.IsInTransition(0) && timer > 0.5f)
                 break;
 
             yield return null;
         }
+
+        isMatching = false;
 
         // Delay action for fragmented animations
         yield return new WaitForSeconds(action.PostActionDelay);
@@ -89,12 +96,17 @@ public class ParkourController : MonoBehaviour
 
     private void MatchTarget(ParkourAction action)
     {
+        //Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {animator.isMatchingTarget}");
+        // Change the animation speed to a number below of 1 and this will fix the target matching.
+
         if (animator.isMatchingTarget) return;
 
-        Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}");
         theAction = action;
+
         animator.MatchTarget(action.MatchPos, transform.rotation, action.MatchBodyPart,
             new MatchTargetWeightMask(action.MatchPositionWieght, 0), action.MatchStartTime, action.MatchTargetTime);
+
+        isMatching = true;
     }
 
     private void OnDrawGizmos()

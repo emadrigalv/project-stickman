@@ -8,6 +8,8 @@ public class EnviromentScanner : MonoBehaviour
     [SerializeField] private Vector3 forwardRayOffset;
     [SerializeField] private float forwardRayLength;
     [SerializeField] private float heightRayLength;
+    [SerializeField] private float ledgeRayLength;
+    [SerializeField] private float ledgeHeightThreshold = 0.75f;
     [SerializeField] private LayerMask obstacleLayer;
 
 
@@ -33,6 +35,28 @@ public class EnviromentScanner : MonoBehaviour
         }
 
         return hitData;
+    }
+
+    public bool LedgeCheck(Vector3 moveDirection)
+    {
+        if (moveDirection == Vector3.zero) return false;
+
+        float originOffset = 0.5f;
+        var origin = transform.position + moveDirection * originOffset + Vector3.up;
+
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, ledgeRayLength, obstacleLayer))
+        {
+            Debug.DrawRay(origin, Vector3.down * ledgeRayLength, Color.green);
+
+            float height = transform.position.y - hit.point.y;
+
+            if (height > ledgeHeightThreshold)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
