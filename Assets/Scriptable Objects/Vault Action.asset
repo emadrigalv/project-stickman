@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fecf5d10df11e74ab967cc4ef27813d, type: 3}
+  m_Name: Vault Action
+  m_EditorClassIdentifier: 
+  animationName: Vault Fence
+  obstacleTag: Fence
+  minHeight: 0.8
+  maxHeight: 1.2
+  rotateToObstacle: 1
+  postActionDelay: 0
+  enableTargetMatching: 1
+  matchStartTime: 0.12
+  matchTargetTime: 0.32
+  matchBodyPart: 5
+  matchPositionWieght: {x: 0, y: 1, z: 1}
