@@ -37,22 +37,33 @@ public class EnviromentScanner : MonoBehaviour
         return hitData;
     }
 
-    public bool LedgeCheck(Vector3 moveDirection)
+    public bool LedgeCheck(Vector3 moveDirection, out LedgeData ledgeData)
     {
+        ledgeData = new LedgeData();
+        
         if (moveDirection == Vector3.zero) return false;
 
         float originOffset = 0.5f;
         var origin = transform.position + moveDirection * originOffset + Vector3.up;
 
-        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, ledgeRayLength, obstacleLayer))
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, ledgeRayLength, obstacleLayer)) // many nested if, refactor needed?
         {
             Debug.DrawRay(origin, Vector3.down * ledgeRayLength, Color.green);
 
-            float height = transform.position.y - hit.point.y;
+            var ledgeWallRayOrigin = transform.position + moveDirection - new Vector3(0, 0.1f, 0);
 
-            if (height > ledgeHeightThreshold)
-            {
-                return true;
+            if (Physics.Raycast(ledgeWallRayOrigin, -moveDirection, out RaycastHit ledgeWallHit, 2, obstacleLayer))
+            { 
+                float height = transform.position.y - hit.point.y;
+
+                if (height > ledgeHeightThreshold)
+                {
+                    ledgeData.angle = Vector3.Angle(transform.forward, ledgeWallHit.normal);
+                    ledgeData.height = height;
+                    ledgeData.ledgeWallHit = ledgeWallHit;
+                    
+                    return true;
+                }
             }
         }
 
@@ -66,4 +77,11 @@ public struct ObstacleHitData
     public bool heightHitFound;
     public RaycastHit forwardHit;
     public RaycastHit heightHit;
+}
+
+public struct LedgeData
+{
+    public float height;
+    public float angle;
+    public RaycastHit ledgeWallHit;
 }

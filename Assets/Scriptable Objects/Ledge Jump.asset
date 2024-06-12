@@ -9,17 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fecf5d10df11e74ab967cc4ef27813d, type: 3}
-  m_Name: Vault Action
+  m_Script: {fileID: 11500000, guid: 8b48e0c89085b4f4db360587f09a3eed, type: 3}
+  m_Name: Ledge Jump
   m_EditorClassIdentifier: 
-  animationName: Vault Fence
-  obstacleTag: Fence
-  minHeight: 0.8
-  maxHeight: 1.2
-  rotateToObstacle: 1
+  animationName: Ledge Jump
+  obstacleTag: 
+  minHeight: 0
+  maxHeight: 0
+  rotateToObstacle: 0
   postActionDelay: 0
   enableTargetMatching: 1
-  matchStartTime: 0.12
-  matchTargetTime: 0.4
-  matchBodyPart: 5
-  matchPositionWieght: {x: 0, y: 1, z: 1}
+  matchStartTime: 0
+  matchTargetTime: 0
+  matchBodyPart: 0
+  matchPositionWieght: {x: 0, y: 1, z: 0}

@@ -9,7 +9,7 @@ public class VaultAction : ParkourAction
 
         var hitPoint = hitData.forwardHit.transform.InverseTransformPoint(hitData.forwardHit.point);
 
-        if (hitPoint.z < 0 && hitPoint.x < 0 || hitPoint.x > 0)
+        if (hitPoint.z < 0 && hitPoint.x < 0 || hitPoint.z > 0 && hitPoint.x > 0)
         {
             // Mirror the animation
             MirrorAnimation = true;

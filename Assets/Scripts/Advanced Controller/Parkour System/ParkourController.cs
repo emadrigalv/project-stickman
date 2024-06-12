@@ -8,22 +8,22 @@ public class ParkourController : MonoBehaviour
     [SerializeField] private EnviromentScanner scanner;
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private ParkourAction ledgeJump;
 
     [Header("Parameters")]
     [SerializeField] private List<ParkourAction> parkourActionList;
 
 
     bool inAction;
-    public bool isMatching = false;
     RaycastHit hit;
     ParkourAction theAction;
 
     private void Update()
     {
+        var hitData = scanner.ObstacleCheck();
+
         if (Input.GetButton("Jump") && !inAction) // many nested if, refactor needed?
         { 
-            var hitData = scanner.ObstacleCheck();
-            
             hit = hitData.heightHit;
             //Debug.Log("La altura rey " + hit.point);
 
@@ -39,6 +39,15 @@ public class ParkourController : MonoBehaviour
                         break;
                     }
                 }
+            }
+        }
+
+        if (playerController.IsOnLedge && !inAction && !hitData.forwardHitFound)
+        {
+            if (playerController.LedgeData.angle <= 50)
+            {
+                playerController.IsOnLedge = false;
+                StartCoroutine(DoParkourAction(ledgeJump));
             }
         }
     }
@@ -85,8 +94,6 @@ public class ParkourController : MonoBehaviour
             yield return null;
         }
 
-        isMatching = false;
-
         // Delay action for fragmented animations
         yield return new WaitForSeconds(action.PostActionDelay);
 
@@ -96,7 +103,7 @@ public class ParkourController : MonoBehaviour
 
     private void MatchTarget(ParkourAction action)
     {
-        //Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {animator.isMatchingTarget}");
+        Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {action.MatchBodyPart}");
         // Change the animation speed to a number below of 1 and this will fix the target matching.
 
         if (animator.isMatchingTarget) return;
@@ -105,8 +112,6 @@ public class ParkourController : MonoBehaviour
 
         animator.MatchTarget(action.MatchPos, transform.rotation, action.MatchBodyPart,
             new MatchTargetWeightMask(action.MatchPositionWieght, 0), action.MatchStartTime, action.MatchTargetTime);
-
-        isMatching = true;
     }
 
     private void OnDrawGizmos()

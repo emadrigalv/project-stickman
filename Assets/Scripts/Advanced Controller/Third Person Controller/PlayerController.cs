@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Vector3 sensorOffset;
     [SerializeField] private LayerMask groundLayer;
 
+    float forwardAirSpeed;
     float ySpeed;
     bool isGrounded;
     bool hasControl = true;
@@ -24,16 +25,22 @@ public class PlayerController : MonoBehaviour
     CameraController camController;
     Quaternion targetRotation;
 
-    public bool IsOnLedge {  get; private set; }
+    public LedgeData LedgeData {  get; set; }
+    public bool IsOnLedge {  get; set; }
     public float RotationSpeed => rotationSpeed;
 
     private void Awake()
     {
         camController = Camera.main.GetComponent<CameraController>();
+
+        forwardAirSpeed = moveSpeed / 2.0f;
     }
 
     private void Update()
     {
+        // Initialize velocity
+        var velocity = Vector3.zero;
+
         // Handle player Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
@@ -51,19 +58,23 @@ public class PlayerController : MonoBehaviour
         // Handle gravity
         GroundCheck();
 
+        animator.SetBool("isGrounded", isGrounded);// Set animator isGrounded Parameter
+        
         if (isGrounded)
         {
             ySpeed = -1.0f;
+            velocity = moveDirection * moveSpeed; // Set velocity when is grounded
 
-            IsOnLedge = enviromentScanner.LedgeCheck(moveDirection);
+            IsOnLedge = enviromentScanner.LedgeCheck(moveDirection, out LedgeData ledgeData);
+            LedgeData = ledgeData;
         }
         else
         {
             ySpeed += Physics.gravity.y * Time.deltaTime;
+            velocity = transform.forward * forwardAirSpeed;  // Set velocity when is in the air
         }
-
-        var velocity = moveDirection * moveSpeed;
-        velocity.y = ySpeed;
+        
+        velocity.y = ySpeed; // applying gravity when grounded
 
         // move player
         characterController.Move(velocity * Time.deltaTime);
