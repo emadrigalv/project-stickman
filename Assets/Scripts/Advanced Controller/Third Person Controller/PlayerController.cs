@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 
 public class PlayerController : MonoBehaviour
@@ -22,6 +23,10 @@ public class PlayerController : MonoBehaviour
     bool isGrounded;
     bool hasControl = true;
 
+    Vector3 desiredMoveDirection;
+    Vector3 moveDirection;
+    Vector3 velocity;
+
     CameraController camController;
     Quaternion targetRotation;
 
@@ -39,7 +44,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         // Initialize velocity
-        var velocity = Vector3.zero;
+        velocity = Vector3.zero;
 
         // Handle player Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
@@ -50,7 +55,8 @@ public class PlayerController : MonoBehaviour
         var moveInput = new Vector3(horizontalInput, 0, verticalInput).normalized;
 
         // Input direction function with the camera view direction in the horizontal plane
-        var moveDirection = camController.PlanarRotation() * moveInput;
+        desiredMoveDirection = camController.PlanarRotation() * moveInput;
+        moveDirection = desiredMoveDirection;
 
         // Playing animation
         if (!hasControl) return;
@@ -63,10 +69,18 @@ public class PlayerController : MonoBehaviour
         if (isGrounded)
         {
             ySpeed = -1.0f;
-            velocity = moveDirection * moveSpeed; // Set velocity when is grounded
+            velocity = desiredMoveDirection * moveSpeed; // Set velocity when is grounded
 
-            IsOnLedge = enviromentScanner.LedgeCheck(moveDirection, out LedgeData ledgeData);
-            LedgeData = ledgeData;
+            // Limit ledge movement
+            IsOnLedge = enviromentScanner.LedgeCheck(desiredMoveDirection, out LedgeData ledgeData);
+            if (IsOnLedge)
+            {
+                LedgeData = ledgeData;
+                LedgeMovement();
+            }
+
+            // Set animation
+            animator.SetFloat("moveAmount", velocity.magnitude/moveSpeed, 0.2f, Time.deltaTime);
         }
         else
         {
@@ -79,18 +93,42 @@ public class PlayerController : MonoBehaviour
         // move player
         characterController.Move(velocity * Time.deltaTime);
 
-        if (moveAmount > 0) targetRotation = Quaternion.LookRotation(moveDirection);
+        // Handle rotation
+        if (moveAmount > 0 && moveDirection.magnitude > 0.2f) targetRotation = Quaternion.LookRotation(moveDirection);
         
-        // Rotate player object
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        
-        // Set animation
-        animator.SetFloat("moveAmount", moveAmount, 0.2f, Time.deltaTime);    
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime); // Rotate player object   
     }
 
     private void GroundCheck()
     {
         isGrounded = Physics.CheckSphere(transform.TransformPoint(sensorOffset), radius, groundLayer);
+    }
+
+    void LedgeMovement()
+    {
+        float signedAngle = Vector3.SignedAngle(LedgeData.ledgeWallHit.normal, desiredMoveDirection, Vector3.up);
+        float angle = Mathf.Abs(signedAngle);
+        
+        if(Vector3.Angle(desiredMoveDirection, transform.forward) >= 80)
+        {
+            // Don't move the player but allow rotation to face the ledge direction
+            velocity = Vector3.zero;
+            return;
+        }
+
+        if(angle < 60)
+        {
+            velocity = Vector3.zero;
+            moveDirection = Vector3.zero;
+        }
+        else if (angle < 90) // angle b/w 60 and 90, limit velocity to horizontal direction
+        {
+            var horizontalLedgeDirection = Vector3.Cross(Vector3.up, LedgeData.ledgeWallHit.normal);
+            var direction = horizontalLedgeDirection * Mathf.Sign(signedAngle);
+
+            velocity = velocity.magnitude * direction;
+            moveDirection = direction;
+        }
     }
 
     public void SetControl(bool hasControl)
