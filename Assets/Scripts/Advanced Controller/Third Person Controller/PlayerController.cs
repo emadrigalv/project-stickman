@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour
     public bool IsOnLedge {  get; set; }
     public float RotationSpeed => rotationSpeed;
 
+    public bool HasControl { get => hasControl; set => hasControl = value; }
+
     private void Awake()
     {
         camController = Camera.main.GetComponent<CameraController>();

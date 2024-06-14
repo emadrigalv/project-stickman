@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EnviromentScanner : MonoBehaviour
@@ -10,8 +11,8 @@ public class EnviromentScanner : MonoBehaviour
     [SerializeField] private float heightRayLength;
     [SerializeField] private float ledgeRayLength;
     [SerializeField] private float ledgeHeightThreshold = 0.75f;
+    [SerializeField] private float raySpacing = 0.25f;
     [SerializeField] private LayerMask obstacleLayer;
-
 
     public ObstacleHitData ObstacleCheck()
     {
@@ -22,7 +23,7 @@ public class EnviromentScanner : MonoBehaviour
 
         hitData.forwardHitFound = Physics.Raycast(forwardOrigin, transform.forward, out hitData.forwardHit, forwardRayLength, obstacleLayer);
 
-        Debug.DrawRay(forwardOrigin, transform.forward * forwardRayLength, (hitData.forwardHitFound) ? Color.green : Color.magenta);
+        //Debug.DrawRay(forwardOrigin, transform.forward * forwardRayLength, (hitData.forwardHitFound) ? Color.green : Color.magenta);
 
         // Check the obstacle height
         if (hitData.forwardHitFound)
@@ -46,22 +47,25 @@ public class EnviromentScanner : MonoBehaviour
         float originOffset = 0.5f;
         var origin = transform.position + moveDirection * originOffset + Vector3.up;
 
-        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, ledgeRayLength, obstacleLayer)) // many nested if, refactor needed?
+        if (PhysicsUtility.ThreeRaycasts(origin, Vector3.down, raySpacing, transform, out List<RaycastHit> hits, ledgeRayLength, obstacleLayer, true)) // many nested if, refactor needed?
         {
-            Debug.DrawRay(origin, Vector3.down * ledgeRayLength, Color.green);
+            var validHits = hits.Where(h => transform.position.y - h.point.y > ledgeHeightThreshold).ToList();
 
-            var ledgeWallRayOrigin = transform.position + moveDirection - new Vector3(0, 0.1f, 0);
+            if (validHits.Count > 0)
+            {
+                var ledgeWallRayOrigin = validHits[0].point;
+                ledgeWallRayOrigin.y = transform.position.y - 0.1f;
 
-            if (Physics.Raycast(ledgeWallRayOrigin, -moveDirection, out RaycastHit ledgeWallHit, 2, obstacleLayer))
-            { 
-                float height = transform.position.y - hit.point.y;
-
-                if (height > ledgeHeightThreshold)
+                if (Physics.Raycast(ledgeWallRayOrigin, -moveDirection, out RaycastHit ledgeWallHit, 2, obstacleLayer))
                 {
+                    Debug.DrawLine(ledgeWallRayOrigin, transform.position, Color.cyan);
+
+                    float height = transform.position.y - validHits[0].point.y;
+
                     ledgeData.angle = Vector3.Angle(transform.forward, ledgeWallHit.normal);
                     ledgeData.height = height;
                     ledgeData.ledgeWallHit = ledgeWallHit;
-                    
+
                     return true;
                 }
             }

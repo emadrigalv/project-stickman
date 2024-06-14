@@ -11,6 +11,7 @@ public class ParkourController : MonoBehaviour
     [SerializeField] private ParkourAction ledgeJump;
 
     [Header("Parameters")]
+    [SerializeField] private float autoJumpHeightLimit = 1.5f;
     [SerializeField] private List<ParkourAction> parkourActionList;
 
 
@@ -42,9 +43,13 @@ public class ParkourController : MonoBehaviour
             }
         }
 
-        if (playerController.IsOnLedge && !inAction && !hitData.forwardHitFound && Input.GetButton("Jump"))
+        if (playerController.IsOnLedge && !inAction && !hitData.forwardHitFound)
         {
-            if (playerController.LedgeData.angle <= 50)
+            bool shouldJump = true;
+            if (playerController.LedgeData.height > autoJumpHeightLimit && !Input.GetButton("Jump"))
+                shouldJump = false;
+
+            if (shouldJump && playerController.LedgeData.angle <= 50)
             {
                 playerController.IsOnLedge = false;
                 StartCoroutine(DoParkourAction(ledgeJump));
