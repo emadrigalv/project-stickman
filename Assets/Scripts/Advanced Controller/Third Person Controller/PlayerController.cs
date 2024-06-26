@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviour
             velocity = desiredMoveDirection * moveSpeed; // Set velocity when is grounded
 
             // Limit ledge movement
-            IsOnLedge = enviromentScanner.LedgeCheck(desiredMoveDirection, out LedgeData ledgeData);
+            IsOnLedge = enviromentScanner.ObstacleLedgeCheck(desiredMoveDirection, out LedgeData ledgeData);
             if (IsOnLedge)
             {
                 LedgeData = ledgeData;
