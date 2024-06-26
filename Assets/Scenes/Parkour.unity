@@ -350,6 +350,7 @@ MonoBehaviour:
   animator: {fileID: 228004190}
   playerController: {fileID: 228004189}
   ledgeJump: {fileID: 11400000, guid: 909fb582b22740942ac8663ccc76092c, type: 2}
+  autoJumpHeightLimit: 1.5
   parkourActionList:
   - {fileID: 11400000, guid: dfba651df2617074a8d031d948f239a5, type: 2}
   - {fileID: 11400000, guid: 2946965d106f0b840b072fc5c57a53d4, type: 2}
@@ -372,6 +373,7 @@ MonoBehaviour:
   heightRayLength: 5
   ledgeRayLength: 10
   ledgeHeightThreshold: 0.75
+  raySpacing: 0.25
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -1349,7 +1351,7 @@ Transform:
   m_GameObject: {fileID: 2108569407}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.51, y: 0.5, z: -7.23}
+  m_LocalPosition: {x: 5.81, y: 0.5, z: -0.16}
   m_LocalScale: {x: 3, y: 1, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []

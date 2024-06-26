@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ParkourController : MonoBehaviour
 {
@@ -14,8 +15,6 @@ public class ParkourController : MonoBehaviour
     [SerializeField] private float autoJumpHeightLimit = 1.5f;
     [SerializeField] private List<ParkourAction> parkourActionList;
 
-
-    bool inAction;
     RaycastHit hit;
     ParkourAction theAction;
 
@@ -23,7 +22,7 @@ public class ParkourController : MonoBehaviour
     {
         var hitData = scanner.ObstacleCheck();
 
-        if (Input.GetButton("Jump") && !inAction) // many nested if, refactor needed?
+        if (Input.GetButton("Jump") && !playerController.InAction) // many nested if, refactor needed?
         { 
             hit = hitData.heightHit;
             //Debug.Log("La altura rey " + hit.point);
@@ -43,7 +42,7 @@ public class ParkourController : MonoBehaviour
             }
         }
 
-        if (playerController.IsOnLedge && !inAction && !hitData.forwardHitFound)
+        if (playerController.IsOnLedge && !playerController.InAction && !hitData.forwardHitFound)
         {
             bool shouldJump = true;
             if (playerController.LedgeData.height > autoJumpHeightLimit && !Input.GetButton("Jump"))
@@ -59,61 +58,34 @@ public class ParkourController : MonoBehaviour
 
     private IEnumerator DoParkourAction(ParkourAction action)
     {
-        // disable player movement before start animation
-        inAction = true;
+        theAction = action;
         playerController.SetControl(false);
 
-        animator.SetBool("mirrorAction", action.MirrorAnimation);
-        animator.CrossFade(action.AnimName, 0.2f);
-
-        yield return null;
-
-        var animState = animator.GetNextAnimatorStateInfo(0);
-
-        // Verify if the animation state is the same as the animation that should be performed
-        if (!animState.IsName(action.AnimName))
-            Debug.LogError($"Parkour animation is wrong! {action.AnimName}");
-
-        float timer = 0.0f;
-
-        while (timer <= animState.length)
+        MatchTargetParameters matchParameters = null;
+        if (action.EnableTargetMatching)
         {
-            timer += Time.deltaTime;
-
-            //Debug.Log("Inverse normal of the obstacle face: " + hit.normal);
-
-            // rotate the player towards the obstacle
-            if (action.RotateToObstacle)
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, action.TargetAnimRotation, playerController.RotationSpeed * Time.deltaTime);
-
-            if (action.EnableTargetMatching)
+            matchParameters = new MatchTargetParameters();
             {
-                animator.applyRootMotion = true;
-                MatchTarget(action);
+                matchParameters.position = action.MatchPos;
+                matchParameters.bodyPart = action.MatchBodyPart;
+                matchParameters.positionWeight = action.MatchPositionWieght;
+                matchParameters.startTime = action.MatchStartTime;
+                matchParameters.targetTime = action.MatchTargetTime;
             }
-            
-
-            if (animator.IsInTransition(0) && timer > 0.5f)
-                break;
-
-            yield return null;
         }
 
-        // Delay action for fragmented animations
-        yield return new WaitForSeconds(action.PostActionDelay);
+        yield return playerController.DoAction(action.AnimName, matchParameters, action.TargetAnimRotation, 
+            action.RotateToObstacle, action.PostActionDelay, action.MirrorAnimation);
 
         playerController.SetControl(true);
-        inAction = false;
     }
 
     private void MatchTarget(ParkourAction action)
     {
-        Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {action.MatchBodyPart}");
+        //Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {action.MatchBodyPart}");
         // Change the animation speed to a number below of 1 and this will fix the target matching.
 
         if (animator.isMatchingTarget) return;
-
-        theAction = action;
 
         animator.MatchTarget(action.MatchPos, transform.rotation, action.MatchBodyPart,
             new MatchTargetWeightMask(action.MatchPositionWieght, 0), action.MatchStartTime, action.MatchTargetTime);

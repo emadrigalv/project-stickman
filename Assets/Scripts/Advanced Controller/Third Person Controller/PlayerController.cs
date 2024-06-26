@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
@@ -31,9 +32,9 @@ public class PlayerController : MonoBehaviour
     Quaternion targetRotation;
 
     public LedgeData LedgeData {  get; set; }
-    public bool IsOnLedge {  get; set; }
     public float RotationSpeed => rotationSpeed;
-
+    public bool IsOnLedge {  get; set; }
+    public bool InAction { get; private set; }
     public bool HasControl { get => hasControl; set => hasControl = value; }
 
     private void Awake()
@@ -133,6 +134,64 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public IEnumerator DoAction(string animName, MatchTargetParameters matchParameters, Quaternion targetRotation,
+        bool rotate = false, float postDelay = 0.0f, bool mirror = false)
+    {
+        // disable player movement before start animation
+        InAction = true;
+
+        animator.SetBool("mirrorAction", mirror);
+        animator.CrossFade(animName, 0.2f);
+
+        yield return null;
+
+        var animState = animator.GetNextAnimatorStateInfo(0);
+
+        // Verify if the animation state is the same as the animation that should be performed
+        if (!animState.IsName(animName))
+            Debug.LogError($"Parkour animation is wrong! {animName}");
+
+        float timer = 0.0f;
+
+        while (timer <= animState.length)
+        {
+            timer += Time.deltaTime;
+
+            //Debug.Log("Inverse normal of the obstacle face: " + hit.normal);
+
+            // rotate the player towards the obstacle
+            if (rotate)
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+
+            if (matchParameters != null)
+            {
+                MatchTarget(matchParameters);
+            }
+
+
+            if (animator.IsInTransition(0) && timer > 0.5f)
+                break;
+
+            yield return null;
+        }
+
+        // Delay action for fragmented animations
+        yield return new WaitForSeconds(postDelay);
+
+        InAction = false;
+    }
+
+    private void MatchTarget(MatchTargetParameters mp)
+    {
+        //Debug.Log($"Matching target with Position: {action.MatchPos}, Rotation: {transform.rotation}, Matching target: {action.MatchBodyPart}");
+        // Change the animation speed to a number below of 1 and this will fix the target matching.
+
+        if (animator.isMatchingTarget) return;
+
+        animator.MatchTarget(mp.position, transform.rotation, mp.bodyPart,
+            new MatchTargetWeightMask(mp.positionWeight, 0), mp.startTime, mp.targetTime);
+    }
+
     public void SetControl(bool hasControl)
     {
         this.hasControl = hasControl;
@@ -150,4 +209,13 @@ public class PlayerController : MonoBehaviour
         Gizmos.color = new(0, 1, 1, 0.5f);
         Gizmos.DrawSphere(transform.TransformPoint(sensorOffset), radius);
     }
+}
+
+public class MatchTargetParameters
+{
+    public Vector3 position;
+    public AvatarTarget bodyPart;
+    public Vector3 positionWeight;
+    public float startTime;
+    public float targetTime;
 }
