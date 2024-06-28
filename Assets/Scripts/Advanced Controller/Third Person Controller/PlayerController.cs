@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
     public LedgeData LedgeData {  get; set; }
     public float RotationSpeed => rotationSpeed;
     public bool IsOnLedge {  get; set; }
+    public bool IsHanging {  get; set; }
     public bool InAction { get; private set; }
     public bool HasControl { get => hasControl; set => hasControl = value; }
 
@@ -63,6 +64,8 @@ public class PlayerController : MonoBehaviour
 
         // Playing animation
         if (!hasControl) return;
+
+        if (IsHanging) return;
 
         // Handle gravity
         GroundCheck();

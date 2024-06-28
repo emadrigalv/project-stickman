@@ -64,14 +64,14 @@ public class ParkourController : MonoBehaviour
         MatchTargetParameters matchParameters = null;
         if (action.EnableTargetMatching)
         {
-            matchParameters = new MatchTargetParameters();
+            matchParameters = new MatchTargetParameters()
             {
-                matchParameters.position = action.MatchPos;
-                matchParameters.bodyPart = action.MatchBodyPart;
-                matchParameters.positionWeight = action.MatchPositionWieght;
-                matchParameters.startTime = action.MatchStartTime;
-                matchParameters.targetTime = action.MatchTargetTime;
-            }
+                position = action.MatchPos,
+                bodyPart = action.MatchBodyPart,
+                positionWeight = action.MatchPositionWieght,
+                startTime = action.MatchStartTime,
+                targetTime = action.MatchTargetTime,
+            };
         }
 
         yield return playerController.DoAction(action.AnimName, matchParameters, action.TargetAnimRotation, 
