@@ -22,7 +22,7 @@ public class ParkourController : MonoBehaviour
     {
         var hitData = scanner.ObstacleCheck();
 
-        if (Input.GetButton("Jump") && !playerController.InAction) // many nested if, refactor needed?
+        if (Input.GetButton("Jump") && !playerController.InAction && !playerController.IsHanging) // many nested if, refactor needed?
         { 
             hit = hitData.heightHit;
             //Debug.Log("La altura rey " + hit.point);

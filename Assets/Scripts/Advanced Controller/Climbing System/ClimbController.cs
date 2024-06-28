@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ClimbController : MonoBehaviour
@@ -8,6 +7,7 @@ public class ClimbController : MonoBehaviour
     [SerializeField] private PlayerController playerController;
     [SerializeField] private EnviromentScanner scanner;
 
+    private ClimbPoint currentPoint;
 
     void Update()
     {
@@ -17,6 +17,8 @@ public class ClimbController : MonoBehaviour
             {
                 if (scanner.ClimbLedgeCheck(transform.forward, out RaycastHit ledgeHit))
                 {
+                    currentPoint = ledgeHit.transform.GetComponent<ClimbPoint>();
+
                     playerController.SetControl(false);
                     StartCoroutine(JumpToLedge("Braced Hang", ledgeHit.transform, 0.41f, 0.56f));
                 }
@@ -24,7 +26,32 @@ public class ClimbController : MonoBehaviour
         }
         else
         {
-            // Implement Ledge to Ledge Jump
+            // Ledge to Ledge Jump
+            float horizontal = Mathf.Round(Input.GetAxisRaw("Horizontal"));
+            float vertical = Mathf.Round(Input.GetAxisRaw("Vertical"));
+
+            var inputDirection = new Vector2(horizontal, vertical);
+
+            if (playerController.InAction || inputDirection == Vector2.zero) return;
+
+            var neightbour = currentPoint.GetNeightbour(inputDirection);
+
+            if (neightbour == null) return;
+
+            if (neightbour.connectionType == ConnectionType.Jump && Input.GetButton("Jump"))
+            {
+                currentPoint = neightbour.point;
+
+                if (neightbour.direction.y == 1)  // Jump up
+                    StartCoroutine(JumpToLedge("Hop Up", currentPoint.transform, 0.35f, 0.66f));
+                if (neightbour.direction.y == -1) // Jump Down
+                    StartCoroutine(JumpToLedge("Hop Down", currentPoint.transform, 0.31f, 0.65f));
+                if (neightbour.direction.x == 1) // Jump Right
+                    StartCoroutine(JumpToLedge("Hop Right", currentPoint.transform, 0.20f, 0.50f));
+                if (neightbour.direction.x == -1) // Jump Left
+                    StartCoroutine(JumpToLedge("Hop Left", currentPoint.transform, 0.20f, 0.50f));
+
+            }
         }
     }
 

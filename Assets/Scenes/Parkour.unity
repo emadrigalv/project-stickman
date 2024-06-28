@@ -142,7 +142,7 @@ PrefabInstance:
       objectReference: {fileID: 352208569}
     - target: {fileID: 63626560350177510, guid: 523e5b3e283f20444a13f67896ca0ebf, type: 3}
       propertyPath: neightbours.Array.data[0].direction.x
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3089645486085131789, guid: 523e5b3e283f20444a13f67896ca0ebf, type: 3}
       propertyPath: m_Name
@@ -2016,6 +2016,10 @@ PrefabInstance:
       propertyPath: neightbours.Array.data[0].point
       value: 
       objectReference: {fileID: 1011014885}
+    - target: {fileID: 63626560350177510, guid: 523e5b3e283f20444a13f67896ca0ebf, type: 3}
+      propertyPath: neightbours.Array.data[0].direction.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3089645486085131789, guid: 523e5b3e283f20444a13f67896ca0ebf, type: 3}
       propertyPath: m_Name
       value: Ledge

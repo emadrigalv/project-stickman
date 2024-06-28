@@ -30,6 +30,19 @@ public class ClimbPoint : MonoBehaviour
         neightbours.Add(neighbour);
     }
 
+    public Neightbour GetNeightbour(Vector2 direction)
+    {
+        Neightbour neightbour = null;
+
+        if (direction.y != 0)
+            neightbour = neightbours.FirstOrDefault(n => n.direction.y == direction.y);
+
+        if(neightbour == null && direction.x != 0)
+            neightbour = neightbours.FirstOrDefault(n => n.direction.x == direction.x);
+
+        return neightbour;
+    }
+
     private void OnDrawGizmos()
     {
         Debug.DrawRay(transform.position, transform.forward, Color.blue);
