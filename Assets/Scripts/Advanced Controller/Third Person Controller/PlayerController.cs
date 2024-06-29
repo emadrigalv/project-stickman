@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -144,8 +145,8 @@ public class PlayerController : MonoBehaviour
         InAction = true;
 
         animator.SetBool("mirrorAction", mirror);
-        animator.CrossFade(animName, 0.2f);
-
+        animator.CrossFadeInFixedTime(animName, 0.2f); // CrossFadeInFixedTime fix target matching if it is not working
+                                                       // due to transition duration betwen animations with big different duration 
         yield return null;
 
         var animState = animator.GetNextAnimatorStateInfo(0);
@@ -154,16 +155,16 @@ public class PlayerController : MonoBehaviour
         if (!animState.IsName(animName))
             Debug.LogError($"Parkour animation is wrong! {animName}");
 
-        float timer = 0.0f;
+        float rotateStartTime =  (matchParameters != null)? matchParameters.startTime : 0.0f;
 
+        float timer = 0.0f;
         while (timer <= animState.length)
         {
             timer += Time.deltaTime;
-
-            //Debug.Log("Inverse normal of the obstacle face: " + hit.normal);
-
-            // rotate the player towards the obstacle
-            if (rotate)
+            float normalizedTimer = timer / animState.length;
+            
+                // rotate the player towards the obstacle
+            if (rotate && normalizedTimer > rotateStartTime)
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
 
             if (matchParameters != null)

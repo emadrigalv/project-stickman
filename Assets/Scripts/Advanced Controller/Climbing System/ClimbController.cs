@@ -43,24 +43,33 @@ public class ClimbController : MonoBehaviour
                 currentPoint = neightbour.point;
 
                 if (neightbour.direction.y == 1)  // Jump up
-                    StartCoroutine(JumpToLedge("Hop Up", currentPoint.transform, 0.35f, 0.66f));
+                    StartCoroutine(JumpToLedge("Hop Up", currentPoint.transform, 0.35f, 0.66f, handOffset: new Vector3(0.25f, 0.025f, 0.125f)));
                 if (neightbour.direction.y == -1) // Jump Down
                     StartCoroutine(JumpToLedge("Hop Down", currentPoint.transform, 0.31f, 0.65f));
                 if (neightbour.direction.x == 1) // Jump Right
                     StartCoroutine(JumpToLedge("Hop Right", currentPoint.transform, 0.20f, 0.50f));
                 if (neightbour.direction.x == -1) // Jump Left
                     StartCoroutine(JumpToLedge("Hop Left", currentPoint.transform, 0.20f, 0.50f));
+            }
+            else if (neightbour.connectionType == ConnectionType.Move)
+            {
+                currentPoint = neightbour.point;
 
+                if (neightbour.direction.x == 1)
+                    StartCoroutine(JumpToLedge("Shimmy Right", currentPoint.transform, 0, 0.38f, handOffset: new Vector3(0.25f, 0.01f, 0.1f)));
+                else if (neightbour.direction.x == -1)
+                    StartCoroutine(JumpToLedge("Shimmy Left", currentPoint.transform, 0, 0.38f, AvatarTarget.LeftHand, handOffset: new Vector3(0.25f, 0.01f, 0.1f)));
             }
         }
     }
 
-    private IEnumerator JumpToLedge(string anim, Transform ledge, float matchStartTime, float matchTargetTime)
+    private IEnumerator JumpToLedge(string anim, Transform ledge, float matchStartTime, 
+        float matchTargetTime, AvatarTarget hand = AvatarTarget.RightHand, Vector3? handOffset = null)
     {
         var matchParameters = new MatchTargetParameters()
         {
-            position = GetHandPosition(ledge),
-            bodyPart = AvatarTarget.RightHand,
+            position = GetHandPosition(ledge, hand, handOffset),
+            bodyPart = hand,
             positionWeight = Vector3.one,
             startTime = matchStartTime,
             targetTime = matchTargetTime
@@ -73,9 +82,14 @@ public class ClimbController : MonoBehaviour
         playerController.IsHanging = true;
     }
 
-    private Vector3 GetHandPosition(Transform ledge)
+    private Vector3 GetHandPosition(Transform ledge, AvatarTarget hand, Vector3? handOffset) 
     {
         // This work properly if ledge Z axis is not facing the wall
-        return ledge.position + ledge.forward * 0.05f + Vector3.up * 0.025f - ledge.right * 0.25f; 
+
+        var offsetValue = (handOffset != null) ? handOffset.Value : new Vector3(0.25f, 0.035f, 0.075f);
+
+        var handDirection = (hand == AvatarTarget.RightHand) ? ledge.right : -ledge.right;
+
+        return ledge.position + ledge.forward * offsetValue.z + Vector3.up * offsetValue.y - handDirection * offsetValue.x; 
     }
 }

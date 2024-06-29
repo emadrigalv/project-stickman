@@ -64,4 +64,4 @@ public class Neightbour
     public bool isTwoWay = true;
 }
 
-public enum ConnectionType { Jump, move}
+public enum ConnectionType { Jump, Move}
