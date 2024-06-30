@@ -40,29 +40,6 @@ public class EnviromentScanner : MonoBehaviour
         return hitData;
     }
 
-    public bool ClimbLedgeCheck(Vector3 direction, out RaycastHit ledgeHit)
-    {
-        ledgeHit = new();
-
-        if (direction == Vector3.zero) return false;
-
-        var origin = transform.position + Vector3.up * 1.5f;
-        var offset = new Vector3(0, 0.18f, 0);
-
-        for (int i = 0; i < 10; i++)
-        {
-            Debug.DrawRay(origin + offset * i, direction);
-
-            if (Physics.Raycast(origin + offset * i, direction, out RaycastHit hit, climbLedgeRayLength, climbLedgeLayer))
-            {
-                ledgeHit = hit;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public bool ObstacleLedgeCheck(Vector3 moveDirection, out LedgeData ledgeData)
     {
         ledgeData = new LedgeData();
@@ -94,6 +71,44 @@ public class EnviromentScanner : MonoBehaviour
                     return true;
                 }
             }
+        }
+
+        return false;
+    }
+
+    public bool ClimbLedgeCheck(Vector3 direction, out RaycastHit ledgeHit)
+    {
+        ledgeHit = new();
+
+        if (direction == Vector3.zero) return false;
+
+        var origin = transform.position + Vector3.up * 1.5f;
+        var offset = new Vector3(0, 0.18f, 0);
+
+        for (int i = 0; i < 10; i++)
+        {
+            Debug.DrawRay(origin + offset * i, direction);
+
+            if (Physics.Raycast(origin + offset * i, direction, out RaycastHit hit, climbLedgeRayLength, climbLedgeLayer))
+            {
+                ledgeHit = hit;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool LedgeDownCheck(out RaycastHit ledgeHit)
+    {
+        ledgeHit = new();
+
+        var origin = transform.position + Vector3.down * 0.1f + transform.forward * 2.0f;
+
+        if (Physics.Raycast(origin, -transform.forward, out RaycastHit hit, 3, climbLedgeLayer))
+        {
+            ledgeHit = hit;
+            return true;
         }
 
         return false;

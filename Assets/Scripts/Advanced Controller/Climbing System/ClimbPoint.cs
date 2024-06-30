@@ -5,7 +5,13 @@ using UnityEngine;
 
 public class ClimbPoint : MonoBehaviour
 {
+    [Header("Parameters")]
+    [SerializeField] private bool mountPoint;
+
+    [Header("Ledge Nodes List")]
     [SerializeField] private List<Neightbour> neightbours;
+
+    public bool MountPoint => mountPoint;
 
     private void Awake()
     {

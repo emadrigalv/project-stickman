@@ -138,7 +138,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public IEnumerator DoAction(string animName, MatchTargetParameters matchParameters, Quaternion targetRotation,
+    public IEnumerator DoAction(string animName, MatchTargetParameters matchParameters = null, Quaternion targetRotation = new(),
         bool rotate = false, float postDelay = 0.0f, bool mirror = false)
     {
         // disable player movement before start animation
@@ -206,6 +206,16 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat("moveAmount", 0.0f);
             targetRotation = transform.rotation;
         }
+    }
+
+    public void SetCharacterController(bool value)
+    {
+        characterController.enabled = value;    
+    }
+
+    public void ResetTargetRotation()
+    {
+        targetRotation = transform.rotation;
     }
 
     private void OnDrawGizmosSelected()

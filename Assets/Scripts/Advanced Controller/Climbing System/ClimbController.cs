@@ -17,15 +17,33 @@ public class ClimbController : MonoBehaviour
             {
                 if (scanner.ClimbLedgeCheck(transform.forward, out RaycastHit ledgeHit))
                 {
-                    currentPoint = ledgeHit.transform.GetComponent<ClimbPoint>();
+                    currentPoint = GetNearestClimbPoint(ledgeHit.transform, ledgeHit.point);
 
                     playerController.SetControl(false);
-                    StartCoroutine(JumpToLedge("Braced Hang", ledgeHit.transform, 0.41f, 0.56f));
+                    StartCoroutine(JumpToLedge("Braced Hang", currentPoint.transform, 0.41f, 0.56f));
+                }
+            }
+
+            if (Input.GetButton("Drop") && !playerController.InAction)
+            {
+                if (scanner.LedgeDownCheck(out RaycastHit ledgeHit))
+                {
+                    currentPoint = GetNearestClimbPoint(ledgeHit.transform, ledgeHit.point);
+
+                    playerController.SetControl(false);
+                    StartCoroutine(JumpToLedge("Fall Hang", currentPoint.transform, 0.3f, 0.45f, handOffset: new Vector3(0.25f, 0.1f, -0.22f)));
                 }
             }
         }
         else
         {
+            // Fall Down from Ledge
+            if (Input.GetButton("Drop") && !playerController.InAction)
+            {
+                StartCoroutine(JumpBack());
+                return;
+            }
+
             // Ledge to Ledge Jump
             float horizontal = Mathf.Round(Input.GetAxisRaw("Horizontal"));
             float vertical = Mathf.Round(Input.GetAxisRaw("Vertical"));
@@ -33,6 +51,13 @@ public class ClimbController : MonoBehaviour
             var inputDirection = new Vector2(horizontal, vertical);
 
             if (playerController.InAction || inputDirection == Vector2.zero) return;
+
+            // Climb to Stand Up from Hanging
+            if (currentPoint.MountPoint && inputDirection.y == 1)
+            {
+                StartCoroutine(HangStandUp());
+                return;
+            }
 
             var neightbour = currentPoint.GetNeightbour(inputDirection);
 
@@ -63,6 +88,16 @@ public class ClimbController : MonoBehaviour
         }
     }
 
+    private IEnumerator JumpBack()
+    {
+        playerController.IsHanging = false;
+
+        yield return StartCoroutine(playerController.DoAction("Jump Back"));
+
+        playerController.ResetTargetRotation();
+        playerController.SetControl(true);
+    }
+
     private IEnumerator JumpToLedge(string anim, Transform ledge, float matchStartTime, 
         float matchTargetTime, AvatarTarget hand = AvatarTarget.RightHand, Vector3? handOffset = null)
     {
@@ -82,6 +117,20 @@ public class ClimbController : MonoBehaviour
         playerController.IsHanging = true;
     }
 
+    private IEnumerator HangStandUp()
+    {
+        playerController.IsHanging = false;
+
+        yield return StartCoroutine(playerController.DoAction("Hang Stand Up"));
+
+        playerController.SetCharacterController(true);
+
+        yield return new WaitForSeconds(0.5f);
+
+        playerController.ResetTargetRotation();
+        playerController.SetControl(true);
+    }
+
     private Vector3 GetHandPosition(Transform ledge, AvatarTarget hand, Vector3? handOffset) 
     {
         // This work properly if ledge Z axis is not facing the wall
@@ -91,5 +140,26 @@ public class ClimbController : MonoBehaviour
         var handDirection = (hand == AvatarTarget.RightHand) ? ledge.right : -ledge.right;
 
         return ledge.position + ledge.forward * offsetValue.z + Vector3.up * offsetValue.y - handDirection * offsetValue.x; 
+    }
+
+    private ClimbPoint GetNearestClimbPoint(Transform ledge, Vector3 hitPoint) 
+    {
+        var points = ledge.GetComponentsInChildren<ClimbPoint>();
+
+        ClimbPoint nearestPoint = null;
+        float nearestPointDistance = Mathf.Infinity;
+
+        foreach ( var point in points )
+        {
+            float distance = Vector3.Distance(point.transform.position, hitPoint);
+
+            if ( distance < nearestPointDistance )
+            {
+                nearestPoint = point;
+                nearestPointDistance = distance;
+            }
+        }
+
+        return nearestPoint;
     }
 }
