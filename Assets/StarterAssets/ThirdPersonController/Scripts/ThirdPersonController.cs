@@ -122,9 +122,13 @@ namespace StarterAssets
             }
         }
 
+        // Melee Controller Parameters
+        private MeleeController meleeController;
 
         private void Awake()
         {
+            meleeController = GetComponent<MeleeController>();
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -213,6 +217,8 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (meleeController.isEquipping || meleeController.isBlocking || meleeController.isKicking || meleeController.isAttacking) return; 
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 

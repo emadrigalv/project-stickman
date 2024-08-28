@@ -20,8 +20,15 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
+		private MeleeController meleeController;
+
+        private void Awake()
+        {
+            meleeController = GetComponent<MeleeController>();
+        }
+
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
+        public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -36,7 +43,9 @@ namespace StarterAssets
 
 		public void OnJump(InputValue value)
 		{
-			JumpInput(value.isPressed);
+            if (meleeController.isBlocking || meleeController.isKicking || meleeController.isAttacking) return;
+
+            JumpInput(value.isPressed);
 		}
 
 		public void OnSprint(InputValue value)
