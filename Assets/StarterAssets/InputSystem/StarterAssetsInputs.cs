@@ -12,6 +12,7 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+		public bool aim;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -20,15 +21,8 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
-		private MeleeController meleeController;
-
-        private void Awake()
-        {
-            meleeController = GetComponent<MeleeController>();
-        }
-
 #if ENABLE_INPUT_SYSTEM
-        public void OnMove(InputValue value)
+		public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -43,14 +37,17 @@ namespace StarterAssets
 
 		public void OnJump(InputValue value)
 		{
-            if (meleeController.isBlocking || meleeController.isKicking || meleeController.isAttacking) return;
-
-            JumpInput(value.isPressed);
+			JumpInput(value.isPressed);
 		}
 
 		public void OnSprint(InputValue value)
 		{
 			SprintInput(value.isPressed);
+		}
+
+		public void OnAim(InputValue value)
+		{
+			AimInput(value.isPressed);
 		}
 #endif
 
@@ -73,6 +70,11 @@ namespace StarterAssets
 		public void SprintInput(bool newSprintState)
 		{
 			sprint = newSprintState;
+		}
+
+		public void AimInput(bool newAimState)
+		{
+			aim = newAimState;
 		}
 
 		private void OnApplicationFocus(bool hasFocus)
