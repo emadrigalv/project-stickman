@@ -13,6 +13,7 @@ public class ThirdPersonShooterController : MonoBehaviour
     [SerializeField] private StarterAssetsInputs starterAssetsInputs;
     [SerializeField] private ThirdPersonController thirdPersonController;
     [SerializeField] private GameObject debugprefab;
+    [SerializeField] private Animator animator;
 
     [Header("Parameters")]
     [SerializeField] private float normalSensitivity;
@@ -59,6 +60,7 @@ public class ThirdPersonShooterController : MonoBehaviour
             aimVirtualCamera.gameObject.SetActive(true);
             thirdPersonController.SetSensitivity(aimSensitivity);
             thirdPersonController.SetRotateOnMove(false);
+            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
 
             Vector3 worldAimTarget = mouseWorldPosition;
             worldAimTarget.y = transform.position.y;
@@ -70,6 +72,8 @@ public class ThirdPersonShooterController : MonoBehaviour
         {
             aimVirtualCamera.gameObject.SetActive(false);
             thirdPersonController.SetSensitivity(normalSensitivity);
+            thirdPersonController.SetRotateOnMove(true);
+            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
         }
     }
 }

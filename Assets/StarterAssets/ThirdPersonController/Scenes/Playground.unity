@@ -1150,6 +1150,7 @@ MonoBehaviour:
   starterAssetsInputs: {fileID: 1762682259}
   thirdPersonController: {fileID: 1762682268}
   debugprefab: {fileID: 702394859}
+  animator: {fileID: 1762682272}
   normalSensitivity: 1
   aimSensitivity: 0.5
   aimColliderMask:
@@ -1167,6 +1168,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26e54e5a728a9234ab24fcf1460ed8a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &1762682272 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 6982812146204527121, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
+  m_PrefabInstance: {fileID: 1762682258}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1764214107
 GameObject:
   m_ObjectHideFlags: 0
